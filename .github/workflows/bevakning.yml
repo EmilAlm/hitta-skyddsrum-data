@@ -1,0 +1,47 @@
+# Kontrollerar varje morgon att nattjobbet i det privata repot EmilAlm/hitta-skyddsrum har
+# publicerat en ny begransade.json, på samma adress som appen hämtar den. Ligger här och inte
+# där, så att den fortsätter larma om nattjobbet stängs av, går sönder eller inte startar.
+# Varje måndag kommer ett kvitto även när allt fungerar, så att det märks om bevakningen själv
+# slutar köras eller om sms:en inte går fram.
+#
+# Skripten i bevakning/ kopieras hit av nattjobbet; ändra dem i det privata repot.
+# Hemligheter: TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN (eller TWILIO_API_KEY + TWILIO_API_SECRET),
+# LARM_FRAN, LARM_TILL. Arbetsflödet körs bara på schema och för hand, aldrig från pull requests,
+# så hemligheterna når inte kod från andra.
+
+name: Bevakning
+
+on:
+  schedule:
+    # 08.00 UTC = 10.00 svensk sommartid, 09.00 vintertid. Nattjobbet körs 04.20 UTC.
+    - cron: "0 8 * * *"
+  workflow_dispatch:
+    inputs:
+      kvitto:
+        description: "Skicka kvitto nu, även om allt fungerar"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  kontrollera:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          sparse-checkout: bevakning
+
+      - name: Kontrollera stängd-listan
+        working-directory: bevakning
+        env:
+          TWILIO_ACCOUNT_SID: ${{ secrets.TWILIO_ACCOUNT_SID }}
+          TWILIO_API_KEY: ${{ secrets.TWILIO_API_KEY }}
+          TWILIO_API_SECRET: ${{ secrets.TWILIO_API_SECRET }}
+          TWILIO_AUTH_TOKEN: ${{ secrets.TWILIO_AUTH_TOKEN }}
+          LARM_FRAN: ${{ secrets.LARM_FRAN }}
+          LARM_TILL: ${{ secrets.LARM_TILL }}
+          KVITTO_NU: ${{ inputs.kvitto && '--kvitto-nu' || '' }}
+        run: python3 bevakning.py --veckokvitto $KVITTO_NU
