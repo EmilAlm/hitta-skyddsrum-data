@@ -13,6 +13,8 @@ Listan över tillfälligt begränsade skyddsrum i Sverige, som appen Hitta skydd
 
 Källa: Myndigheten för civilt försvar (MCF), skyddsrummens öppna visningstjänst (`https://inspire.mcf.se/skyddsrum/wfs`). Listan uppdateras automatiskt varje natt. Varje version finns kvar i historiken.
 
+Support, integritet, villkor och säkerhet för appen finns på https://emilalm.app/skyddsrum/support; sidorna här skickar vidare dit.
+
 Det här är inte en tjänst från MCF. Uppgifterna om ett skyddsrum ska kontrolleras hos MCF eller kommunen.
 
 En bevakning (`.github/workflows/bevakning.yml`) kontrollerar varje morgon att listan har uppdaterats och skickar ett sms till den som driver appen om den inte har det.
